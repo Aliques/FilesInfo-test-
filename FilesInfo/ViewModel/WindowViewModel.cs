@@ -66,7 +66,7 @@ namespace FilesInfo.ViewModel
         /// </summary>
         /// <param name="path">Selected folder path</param>
         /// <returns></returns>
-        private List<string> GetAllFiles(string path)
+        public List<string> GetAllFiles(string path)
         {
             ProgressBarVisibility = Visibility.Visible;
             var files = new List<string>();
