@@ -20,6 +20,7 @@ namespace FilesInfo.ViewModel
         private IDocumentSettings documentSettings;
 
         #region Fields
+        public Visibility ProgressBarVisibility { get; set; } = Visibility.Hidden;
         public double WindowMinWidth { get; set; } = 750;
         public string FolderPath { get; set; }
         public bool CreateReportBtnIsEnabled { get; set; } = false;
@@ -28,7 +29,7 @@ namespace FilesInfo.ViewModel
         public WindowViewModel()
         {
             SelectFolderCommand = new RelayCommand(() => SelectFolder());
-            CreateReportCommand = new RelayCommand(async()=> await CreateReport());
+            CreateReportCommand = new RelayCommand(()=>  CreateReport());
             SaveOpenFileCommand = new RelayCommand(()=>SaveAndOpenFile());
             FolderFieldChangedCommand = new RealayParametrizedCommand( async(args)=> await FolderFieldChanged(args));
         }
@@ -51,6 +52,7 @@ namespace FilesInfo.ViewModel
         }
         private void SelectFolder()
         {
+            FileManipulateButtonsVisibility = Visibility.Hidden;
             List<string> files=new List<string>();
             FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
 
@@ -66,15 +68,20 @@ namespace FilesInfo.ViewModel
         /// <returns></returns>
         private List<string> GetAllFiles(string path)
         {
+            ProgressBarVisibility = Visibility.Visible;
             var files = new List<string>();
             try
             {
-                files.AddRange(Directory.GetFiles(path, "*", SearchOption.TopDirectoryOnly));
+                files.AddRange(Directory.GetFiles(path, "*", SearchOption.AllDirectories));
                 foreach (var directory in Directory.GetDirectories(path))
                     files.AddRange(Directory.GetFiles(directory, "*"));
             }
-            catch (UnauthorizedAccessException) { }
-
+            catch (UnauthorizedAccessException)
+            {
+                System.Windows.MessageBox.Show("Нет доступа к системным файлам");
+                return null;
+            }
+            ProgressBarVisibility = Visibility.Hidden;
             return files;
         }
 
@@ -82,16 +89,19 @@ namespace FilesInfo.ViewModel
         {
             IBuildDocument htmlReport = new HtmlReport<IEnumerable<string>>(data);
 
-            return htmlReport.BuildDocument();
+               return htmlReport.BuildDocument();
         }
 
-        private void SaveAndOpenFile() //
+        private void SaveAndOpenFile() 
         {
             if(string.IsNullOrEmpty(reportText)||string.IsNullOrWhiteSpace(reportText))
             {
                 System.Windows.MessageBox.Show("Что-то пошло не так...");
             }
-            documentSettings = GetDocumentSettings(FileType.Html); //допустим пока так
+
+            //допустим пока так
+            documentSettings = GetDocumentSettings(FileType.Html);
+
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
             saveFileDialog.FileName = documentSettings.DefaultFileName;
             saveFileDialog.DefaultExt = documentSettings.DefaultExtention;
@@ -126,14 +136,27 @@ namespace FilesInfo.ViewModel
                     return null;
             }
         }
-        private async Task CreateReport()
+        private async void CreateReport()
         {
-            if (FolderPath != string.Empty)
+            await Task.Run(() =>
             {
-                var files = await Task.Run(() => GetAllFiles(FolderPath));
-                reportText = BuildHtmlReportDocument(files);
-                FileManipulateButtonsVisibility = Visibility.Visible;
-            }
+                if (FolderPath != string.Empty)
+                {
+                    
+                    FileManipulateButtonsVisibility = Visibility.Hidden;
+
+                    var files = GetAllFiles(FolderPath);//ас
+                    ProgressBarVisibility = Visibility.Visible;
+                    if (files is null)
+                    {
+                        ProgressBarVisibility = Visibility.Hidden;
+                        return;
+                    }
+                    reportText = BuildHtmlReportDocument(files);//ас
+                    ProgressBarVisibility = Visibility.Hidden;
+                    FileManipulateButtonsVisibility = Visibility.Visible;
+                }
+            });
         }
 
         #endregion

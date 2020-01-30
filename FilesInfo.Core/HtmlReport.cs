@@ -44,7 +44,8 @@ namespace FilesInfo.Core
                                         new XElement("th","Колличество", new XAttribute("scope","col"))
                                     )),
                         ExtentionsStatisticsBuilder(extentionList)
-                        )),
+                        ))),
+                        new XElement("div", new XAttribute("class","row"),
                          new XElement("div", new XAttribute("class", "col-md-8"),
                             new XElement("table", new XAttribute("class", "table table-sm"),
                                 new XElement("thead", new XAttribute("class", "thead-dark"),
@@ -71,7 +72,7 @@ namespace FilesInfo.Core
             foreach (var val in extentions.Distinct())
             {
                     tbody.Add(new XElement("tr",
-                               new XElement("td", val),
+                               new XElement("td", val==string.Empty?"Неизвестный формат":val),
                                new XElement("td", extentions.Where(x => x == val).Count())
                                ));
             }
@@ -93,7 +94,7 @@ namespace FilesInfo.Core
                 tbody.Add(new XElement("tr",
                                new XElement("th", new XAttribute("scope", "row"), rowNumber++),
                                new XElement("td", fileInfo.Name),
-                               new XElement("td",fileInfo.Extension),
+                               new XElement("td",fileInfo.Extension==string.Empty? "Неизвестный формат": fileInfo.Extension),
                                new XElement("td", fileInfo.Length),
                                new XElement("td", fileInfo.DirectoryName)
                                ));

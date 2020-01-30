@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FilesInfo.Core", "FilesInfo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2C82931D-3F7D-4462-B25C-231C2BF81F83}"
 	ProjectSection(SolutionItems) = preProject
-		PrototypeHTML.html = PrototypeHTML.html
+		..\..\..\Documents\HtmlDocument.html = ..\..\..\Documents\HtmlDocument.html
 	EndProjectSection
 EndProject
 Global
