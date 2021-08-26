@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{1B80E0C0-DFA7-4AD5-A2BF-6F0582A27719}</ProjectGuid>
+    <ProjectGuid>{C0E81066-7F4F-4097-9064-7BF8128DBF85}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FilesInfo.Core</RootNamespace>
-    <AssemblyName>FilesInfo.Core</AssemblyName>
+    <RootNamespace>FilesInfo.ReportLib</RootNamespace>
+    <AssemblyName>FilesInfo.ReportLib</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -31,7 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
@@ -43,22 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Models\FileInformation.cs" />
+    <Compile Include="Contracts\IDocumentSettings.cs" />
+    <Compile Include="Contracts\IReportDocument.cs" />
+    <Compile Include="HtmlReport\HtmlDocumentSettings.cs" />
+    <Compile Include="HtmlReport\HtmlReport.cs" />
+    <Compile Include="Models\FilesStatisticModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModel\BaseViewModel.cs" />
-    <Compile Include="ViewModel\RealayParametrizedCommand.cs" />
-    <Compile Include="ViewModel\RelayCommand.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="Win32_TPMLib">
-      <Guid>{61E207A5-827C-42E9-ADFA-165C6A745EE4}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

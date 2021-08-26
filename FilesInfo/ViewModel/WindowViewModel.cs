@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Text;
 using System.Diagnostics;
+using FilesInfo.ReportLib.HtmlReport;
+using FilesInfo.ReportLib.Contracts;
 
 namespace FilesInfo.ViewModel
 {
@@ -28,8 +30,8 @@ namespace FilesInfo.ViewModel
         #endregion
         public WindowViewModel()
         {
-            SelectFolderCommand = new RelayCommand(() => SelectFolder());
-            CreateReportCommand = new RelayCommand(()=>  CreateReport());
+            SelectFolderCommand = new RelayCommand(()=>SelectFolder());
+            CreateReportCommand = new RelayCommand(()=>CreateReport());
             SaveOpenFileCommand = new RelayCommand(()=>SaveAndOpenFile());
             FolderFieldChangedCommand = new RealayParametrizedCommand( async(args)=> await FolderFieldChanged(args));
         }
@@ -53,48 +55,25 @@ namespace FilesInfo.ViewModel
         private void SelectFolder()
         {
             FileManipulateButtonsVisibility = Visibility.Hidden;
-            List<string> files=new List<string>();
             FolderBrowserDialog folderBrowser = new FolderBrowserDialog();
 
             FolderPath = folderBrowser.ShowDialog() == DialogResult.OK ? folderBrowser.SelectedPath : string.Empty;
 
             CreateReportBtnIsEnabled = FolderPath != string.Empty;
+            reportText = null;
+
         }
 
-        /// <summary>
-        /// Get all files from selected folder
-        /// </summary>
-        /// <param name="path">Selected folder path</param>
-        /// <returns></returns>
-        public List<string> GetAllFiles(string path)
+      
+        private string BuildHtmlReportDocument(string path)
         {
-            ProgressBarVisibility = Visibility.Visible;
-            var files = new List<string>();
-            try
-            {
-                files.AddRange(Directory.GetFiles(path, "*", SearchOption.AllDirectories));
-                foreach (var directory in Directory.GetDirectories(path))
-                    files.AddRange(Directory.GetFiles(directory, "*"));
-            }
-            catch (UnauthorizedAccessException)
-            {
-                System.Windows.MessageBox.Show("Нет доступа к системным файлам");
-                return null;
-            }
-            ProgressBarVisibility = Visibility.Hidden;
-            return files;
+            IReportDocument htmlReport = new HtmlReport(path);
+            return htmlReport.BuildDocument();
         }
 
-        private string BuildHtmlReportDocument(IEnumerable<string> data)
+        private void SaveAndOpenFile()
         {
-            IBuildDocument htmlReport = new HtmlReport<IEnumerable<string>>(data);
-
-               return htmlReport.BuildDocument();
-        }
-
-        private void SaveAndOpenFile() 
-        {
-            if(string.IsNullOrEmpty(reportText)||string.IsNullOrWhiteSpace(reportText))
+            if (string.IsNullOrEmpty(reportText) || string.IsNullOrWhiteSpace(reportText))
             {
                 System.Windows.MessageBox.Show("Что-то пошло не так...");
             }
@@ -110,7 +89,7 @@ namespace FilesInfo.ViewModel
             {
                 try
                 {
-                    using (StreamWriter file = new StreamWriter(saveFileDialog.FileName,false, Encoding.UTF8))
+                    using (StreamWriter file = new StreamWriter(saveFileDialog.FileName, false, Encoding.UTF8))
                     {
                         file.WriteLine(reportText);
                     }
@@ -119,8 +98,11 @@ namespace FilesInfo.ViewModel
                 {
                     System.Windows.MessageBox.Show(e.Message);
                 }
-                    Process.Start(saveFileDialog.FileName);
+                Process.Start(saveFileDialog.FileName);
 
+                documentSettings = null;
+                reportText = null;
+                GC.Collect();
                 return;
             }
         }
@@ -129,7 +111,7 @@ namespace FilesInfo.ViewModel
             switch (fileType)
             {
                 case FileType.Html:
-                    return new HtmlDocumentService();
+                    return new HtmlDocumentSettings();
                 case FileType.Json:
                     return null;
                 default:
@@ -142,19 +124,23 @@ namespace FilesInfo.ViewModel
             {
                 if (FolderPath != string.Empty)
                 {
-                    
-                    FileManipulateButtonsVisibility = Visibility.Hidden;
-
-                    var files = GetAllFiles(FolderPath);//ас
-                    ProgressBarVisibility = Visibility.Visible;
-                    if (files is null)
+                    try
                     {
+                        FileManipulateButtonsVisibility = Visibility.Hidden;
+                        ProgressBarVisibility = Visibility.Visible;
+                        reportText = BuildHtmlReportDocument(FolderPath);
+                        GC.Collect();
                         ProgressBarVisibility = Visibility.Hidden;
-                        return;
+                        FileManipulateButtonsVisibility = Visibility.Visible;
                     }
-                    reportText = BuildHtmlReportDocument(files);//ас
-                    ProgressBarVisibility = Visibility.Hidden;
-                    FileManipulateButtonsVisibility = Visibility.Visible;
+                    catch (UnauthorizedAccessException e)
+                    {
+                        System.Windows.MessageBox.Show(e.Message);
+                        ProgressBarVisibility = Visibility.Hidden;
+                        FileManipulateButtonsVisibility = Visibility.Hidden;
+                        CreateReportBtnIsEnabled = false;
+                        FolderPath = string.Empty;
+                    }
                 }
             });
         }
@@ -174,7 +160,9 @@ namespace FilesInfo.ViewModel
     public enum FileType
     {
         Html,
-        Json
+        Json,
+        Xml,
+        Csv
             //и.т.д
     }
 }
