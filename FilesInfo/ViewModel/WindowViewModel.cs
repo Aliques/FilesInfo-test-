@@ -102,6 +102,9 @@ namespace FilesInfo.ViewModel
 
                 documentSettings = null;
                 reportText = null;
+                FileManipulateButtonsVisibility = Visibility.Hidden;
+                FolderPath = string.Empty;
+                CreateReportBtnIsEnabled = false;
                 GC.Collect();
                 return;
             }

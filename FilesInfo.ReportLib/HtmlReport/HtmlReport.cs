@@ -167,9 +167,11 @@ namespace FilesInfo.ReportLib.HtmlReport
         {
             var tbody = new XElement("tbody");
             var s = extentionList;
+            
             var distinctedList = extentionList.Distinct();
-            var totalCount = (double)distinctedList.Count();
-            var multiplier = totalCount * 0.1;
+            var countItems = (double)distinctedList.Count();
+            var totalCount = distinctedList.Sum(o => o.TotalCount);
+            var multiplier = countItems * 0.1;
             int rowNumber = 0;
 
             foreach (var val in distinctedList)
@@ -179,7 +181,7 @@ namespace FilesInfo.ReportLib.HtmlReport
                             new XElement("th", new XAttribute("scope", "row"), rowNumber++),
                            new XElement("td", val.MimeType),
                            new XElement("td", val.TotalCount),
-                           new XElement("td", Math.Round(((extentionCount / totalCount) * 100), 3).ToString()),
+                           new XElement("td", Math.Round(val.TotalCount / (double)totalCount*100,5)),
                            new XElement("td", Math.Round(val.TotalSize/val.TotalCount,3))
                 ));
             }
