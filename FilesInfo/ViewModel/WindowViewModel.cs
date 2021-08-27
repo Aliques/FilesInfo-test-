@@ -20,6 +20,7 @@ namespace FilesInfo.ViewModel
 
         private string reportText;
         private IDocumentSettings documentSettings;
+        private IReportDocument htmlReport;
 
         #region Fields
         public Visibility ProgressBarVisibility { get; set; } = Visibility.Hidden;
@@ -67,7 +68,7 @@ namespace FilesInfo.ViewModel
       
         private string BuildHtmlReportDocument(string path)
         {
-            IReportDocument htmlReport = new HtmlReport(path);
+            htmlReport = new HtmlReport(path);
             return htmlReport.BuildDocument();
         }
 
@@ -159,6 +160,22 @@ namespace FilesInfo.ViewModel
 
         public ICommand FolderFieldChangedCommand { get; set; }
         #endregion
+
+        public HtmlDocumentSettings HtmlDocumentSettings
+        {
+            get => default;
+            set
+            {
+            }
+        }
+
+        public HtmlReport HtmlReport
+        {
+            get => default;
+            set
+            {
+            }
+        }
     }
     public enum FileType
     {
